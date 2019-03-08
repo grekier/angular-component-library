@@ -1,44 +1,45 @@
 import { Component, OnInit } from '@angular/core';
-import {FileSystemDirectoryEntry, FileSystemFileEntry, UploadEvent, UploadFile} from 'ngx-file-drop';
+import {FileSystemEntry, FileSystemFileEntry, UploadEvent, UploadFile} from 'ngx-file-drop';
+import {FileWithPath} from './dnd-with-preview.models';
 
 @Component({
   selector: 'osnode-dnd-with-preview',
-  template: `
-    <p>
-      dnd-with-preview works!
-    </p>
-  `,
+  templateUrl: './dnd-with-preview.component.html',
   styles: []
 })
 export class DndWithPreviewComponent implements OnInit {
-  public files: File[] = [];
+  public files: FileWithPath[] = [];
 
   constructor() { }
 
   ngOnInit() {
   }
 
-  public dropped(event: UploadEvent) {
+  dropped(event: UploadEvent) {
     for (const droppedFile of event.files) {
       if (droppedFile.fileEntry.isFile) {
         const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
         fileEntry.file((file: File) => {
-          console.log(droppedFile.relativePath, file);
-          this.files.push(file);
+          const f: FileWithPath = {relativePath: droppedFile.relativePath, file};
+          const reader: FileReader = new FileReader();
+          reader.onload = (() => {
+            f.imageURL = reader.result;
+            console.log('Reader callback');
+            console.log(f);
+          });
+          reader.readAsDataURL(file);
+          this.files.push(f);
+          console.log(f);
         });
-      } else {
-        const fileEntry = droppedFile.fileEntry as FileSystemDirectoryEntry;
-        console.log(droppedFile.relativePath, fileEntry);
-        // TODO add all files recursively
       }
     }
   }
 
-  public fileOver(event) {
+  fileOver(event) {
     console.log(event);
   }
 
-  public fileLeave(event) {
+  fileLeave(event) {
     console.log(event);
   }
 }
