@@ -5,7 +5,7 @@ import {FileWithPath} from './dnd-with-preview.models';
 @Component({
   selector: 'osnode-dnd-with-preview',
   templateUrl: './dnd-with-preview.component.html',
-  styles: []
+  styleUrls: ['./dnd-with-preview.component.less']
 })
 export class DndWithPreviewComponent implements OnInit {
   public files: FileWithPath[] = [];
@@ -22,12 +22,14 @@ export class DndWithPreviewComponent implements OnInit {
         fileEntry.file((file: File) => {
           const f: FileWithPath = {relativePath: droppedFile.relativePath, file};
           const reader: FileReader = new FileReader();
-          reader.onload = (() => {
-            f.imageURL = reader.result;
-            console.log('Reader callback');
-            console.log(f);
-          });
-          reader.readAsDataURL(file);
+          if (file.type.match('image.*')) {
+            reader.onload = (() => {
+              f.imageURL = reader.result;
+              console.log('Reader callback');
+              console.log(f);
+            });
+            reader.readAsDataURL(file);
+          }
           this.files.push(f);
           console.log(f);
         });
